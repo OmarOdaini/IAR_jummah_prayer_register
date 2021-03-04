@@ -1,4 +1,4 @@
-# prayer-register
+# IAR masjid Jummah prayer register
 
 ### Steps to enable script:
 
