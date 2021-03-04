@@ -10,9 +10,9 @@ from time import sleep
 # Chrome
 chromePath = "{}/chromedriver".format(dirname(abspath(__file__)))
 options = Options()
-# # silent mode
-# options.add_argument('--headless')
-# options.add_argument('--disable-gpu') 
+# silent mode
+options.add_argument('--headless')
+options.add_argument('--disable-gpu') 
 
 # create a chrome driver instance
 driver = Chrome(chromePath, options=options)
