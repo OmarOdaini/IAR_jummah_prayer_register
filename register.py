@@ -69,7 +69,7 @@ def Register():
 
             # Fill out form 
             FillContactInfo(person['firstname'], person['lastname'], person['email'], person['phone'])
-            # ClickRegister()
+            ClickRegister()
 
         except Exception as error:
             print("Failed to Register, Error: {}".format(error))
