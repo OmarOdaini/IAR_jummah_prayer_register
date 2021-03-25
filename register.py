@@ -6,88 +6,60 @@ from selenium.webdriver.support import expected_conditions as EC
 from os.path import dirname, abspath
 from time import sleep
 
-
-# Chrome
-chromePath = "{}/chromedriver".format(dirname(abspath(__file__)))
-options = Options()
-# silent mode
-options.add_argument('--headless')
-options.add_argument('--disable-gpu') 
-
-# create a chrome driver instance
-driver = Chrome(chromePath, options=options)
-
-# People to register
-Registrants = [
-    # FOLLOW THE EXAMPLE BELOW FOR PESONAL INFO FORMAT (only update the right side after colon):
-    # {
-    #     "catagory": "men or women",
-    #     "timeslot": "timeslot",
-    #     "firstname": "firstname", 
-    #     "lastname": "lastname",
-    #     "email": "email to get tickets",
-    #     "phone": "phone #"
-    # }
-]
-
-# Shifts details
-Shifts = {
-    "men": {
-        "11:00": "Men 1st Shift (11:00 AM)",
-        "12:00": "Men 2nd Shift (12:00 PM)",
-        "1:00": "Men 3rd Shift (1:00 PM)",
-        "2:15": "Men 4th Shift (2:15 PM)"
-    },
-    "women": {
-        "11:00": "Women 1st Shift (11:00 AM)",
-        "12:00": "Women 2nd Shift (12:00 PM)",
-        "1:00": "Women 3rd Shift (1:00 PM)",
-        "2:15": "Women 4th Shift (2:15 PM)"
-    }
-}
-
-
-def Register():
+def main(Registrants, Shifts):
     for person in Registrants:
         try:
+            # new driver 
+            driver = GetDriver()
             # get to IAR Jummah page
             driver.get("https://raleighmasjid.org/jumaa")
             assert "The Islamic Association of Raleigh - Jumuah Registration" in driver.title
 
             # get to eventbrite page
-            driver.get(GetLinkfromBtn("Register for Jumuah Shifts"))
+            driver.get(GetLinkfromBtn("Register for Jumuah Shifts", driver))
             assert "IAR Jumu'ah Registration" in driver.title
-            ClickRegister()
+            ClickRegister(driver)
 
             # switch iframe (to access pop-ups)
             driver.switch_to.frame(driver.find_element_by_xpath("//iframe[starts-with(@id, 'eventbrite-widget-modal-')]"))
-            sleep(3)
+            sleep(2)
 
             # Increment to specified catagory
-            IncrementCatagory(Shifts[person['catagory']][person['timeslot']], 1)
-            ClickRegister()
+            IncrementCatagory(Shifts[person['catagory']][person['timeslot']], driver)
+            ClickRegister(driver)
 
             # Fill out form 
-            FillContactInfo(person['firstname'], person['lastname'], person['email'], person['phone'])
-            ClickRegister()
+            FillContactInfo(person['firstname'], person['lastname'], person['email'], person['phone'], driver)
+            # ClickRegister( driver)
 
         except Exception as error:
             print("Failed to Register, Error: {}".format(error))
         else:
-            sleep(3) 
+            sleep(5) 
             print("Tickets were sent to: {}".format(person['email']))
-            driver.quit() 
-       
-def IncrementCatagory(catagory, numberOfPpl):
+            driver.quit()
+
+def GetDriver():
+    # Chrome
+    chromePath = "{}/chromedriver".format(dirname(abspath(__file__)))
+    # options object
+    options = Options()
+    # # silent mode
+    # options.add_argument('--headless')
+    # options.add_argument('--disable-gpu') 
+    return Chrome(chromePath, options=options)
+
+def IncrementCatagory(catagory, driver):
     # Select dropdown XPATH relative to catagory title
     TitletoSelectPath = "../../div[2]/div/div/div/div/div[2]/select"
+    number = 1
     # Relateive XPATH based on catagory name
-    incrementXPATH = "//h3[text()='{}']/{}/option[text()='{}']".format(catagory, TitletoSelectPath, numberOfPpl)
+    incrementXPATH = "//h3[text()='{}']/{}/option[text()='{}']".format(catagory, TitletoSelectPath, number)
     # Increment 
     WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, incrementXPATH))).click()
 
-def FillContactInfo(fname, lname, email, phone):
-     # Text feild IDs
+def FillContactInfo(fname, lname, email, phone, driver):
+    # Text feild IDs
     inputForm = {
             "buyer.N-first_name" : fname,
             "buyer.N-last_name" : lname,
@@ -111,22 +83,59 @@ def FillContactInfo(fname, lname, email, phone):
         ]
 
     for key in inputForm:
-        textFeild = WebDriverWait(driver, 3).until(EC.presence_of_element_located((By.ID, key)))
+        textFeild = WebDriverWait(driver, 2).until(EC.presence_of_element_located((By.ID, key)))
         textFeild.send_keys(inputForm[key])  
         
     for clickable in clickables:
-        checkbox = WebDriverWait(driver, 3).until(EC.presence_of_element_located((By.ID, clickable)))
+        checkbox = WebDriverWait(driver, 2).until(EC.presence_of_element_located((By.ID, clickable)))
         driver.execute_script("arguments[0].click();", checkbox)
 
-def ClickRegister():
+def ClickRegister(driver):
     WebDriverWait(driver, 10).until(
         EC.presence_of_element_located((By.XPATH, "//button[text()='Register']"))
     ).click()
-    sleep(3)
+    sleep(5)
 
-def GetLinkfromBtn(text):
+def GetLinkfromBtn(text, driver):
     return WebDriverWait(driver, 10).until(
         EC.presence_of_element_located((By.LINK_TEXT, text))
     ).get_attribute('href')
 
-Register()
+if __name__ == "__main__":
+    # People to register
+    Registrants = [
+        # FOLLOW THE EXAMPLE BELOW FOR PESONAL INFO FORMAT (only update the right side after colon):
+        # {
+        #     "catagory": "men or women",
+        #     "timeslot": "timeslot",
+        #     "firstname": "firstname", 
+        #     "lastname": "lastname",
+        #     "email": "email to get tickets",
+        #     "phone": "phone #"
+        # },
+        {
+            "catagory": "men",
+            "timeslot": "3:00",
+            "firstname": "test", 
+            "lastname": "test",
+            "email": "test@gmail.com",
+            "phone": "2342342343"
+        }
+    ]
+    # Shifts details
+    Shifts = {
+        "men": {
+            "11:00": "Men 1st Shift (11:00 AM)",
+            "12:00": "Men 2nd Shift (12:00 PM)",
+            "1:00": "Men 3rd Shift (1:00 PM)",
+            "3:00": "Men 4th Shift (3:00 PM)"
+        },
+        "women": {
+            "11:00": "Women 1st Shift (11:00 AM)",
+            "12:00": "Women 2nd Shift (12:00 PM)",
+            "1:00": "Women 3rd Shift (1:00 PM)",
+            "3:00": "Women 4th Shift (3:00 PM)"
+        }
+    }
+    # call main function
+    main(Registrants, Shifts)
