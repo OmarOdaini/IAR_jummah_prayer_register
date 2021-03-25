@@ -30,7 +30,7 @@ def main(Registrants, Shifts):
 
             # Fill out form 
             FillContactInfo(person['firstname'], person['lastname'], person['email'], person['phone'], driver)
-            # ClickRegister( driver)
+            ClickRegister(driver)
 
         except Exception as error:
             print("Failed to Register, Error: {}".format(error))
@@ -44,9 +44,9 @@ def GetDriver():
     chromePath = "{}/chromedriver".format(dirname(abspath(__file__)))
     # options object
     options = Options()
-    # # silent mode
-    # options.add_argument('--headless')
-    # options.add_argument('--disable-gpu') 
+    # silent mode
+    options.add_argument('--headless')
+    options.add_argument('--disable-gpu') 
     return Chrome(chromePath, options=options)
 
 def IncrementCatagory(catagory, driver):
