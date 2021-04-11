@@ -57,7 +57,7 @@ def main(Registrants, Shifts):
             ##### 6) Fill out form
             try: 
                 FillContactInfo(person['firstname'], person['lastname'], person['email'], person['phone'], driver)
-                # ClickRegister(driver)
+                ClickRegister(driver)
             except Exception as error:
                 print("Failed to fill out personal info page, Error: {}".format(error)) 
 
@@ -74,9 +74,9 @@ def GetDriver():
     
     # options object
     options = Options()
-    # # silent mode
-    # options.add_argument('--headless')
-    # options.add_argument('--disable-gpu') 
+    # silent mode
+    options.add_argument('--headless')
+    options.add_argument('--disable-gpu') 
     return Chrome(chromePath, options=options)
 
 def SelectCatagory(catagory, driver):
