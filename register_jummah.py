@@ -9,33 +9,57 @@ from time import sleep
 def main(Registrants, Shifts):
     for person in Registrants:
         try:
-            # new driver 
-            driver = GetDriver()
+            # New Chrome driver
+            try: 
+                driver = GetDriver()
+            except Exception as error:
+                print("Failed create a driver instance, Error: {}".format(error))
             
-            # get to IAR Jummah page
+
+            ##### 1) Get to IAR Jummah page
             driver.get("https://raleighmasjid.org/jumaa")
             assert "The Islamic Association of Raleigh - Jumuah Registration" in driver.title
 
-            # get to eventbrite page
+
+            ##### 2) Get to eventbrite registration page
             driver.get(GetLinkfromBtn("Register for Jumuah Shifts", driver))
             assert "IAR Jumu'ah Registration" in driver.title
 
-            # Click Select A Date
-            GetLinkfromBtnByXPATH("//button[starts-with(@id, 'eventbrite-widget-modal-trigger-')]", driver).click()
-                                    
+            ##### 3) Click "Select A Date" (TODO: make it based on text instead)
+            try: 
+                GetLinkfromBtnByXPATH("//button[starts-with(@id, 'eventbrite-widget-modal-trigger-')]", driver).click()
+            except Exception as error:
+                print("Failed to find or click 'Select A Date', Error: {}".format(error))
+
+
             # switch iframe (to access pop-ups)
-            driver.switch_to.frame(driver.find_element_by_xpath("//iframe[starts-with(@id, 'eventbrite-widget-modal-')]"))
+            try: 
+                driver.switch_to.frame(driver.find_element_by_xpath("//iframe[starts-with(@id, 'eventbrite-widget-modal-')]"))
+            except Exception as error:
+                print("Failed to switch iframe, Error: {}".format(error))
 
-            # Select Jummah
-            ClickCatagory("Fri, 11:00 AM - 3:15 PM EDT", driver)
 
-            # Increment to specified catagory
-            IncrementCatagory(Shifts[person['catagory']][person['timeslot']], driver)
-            ClickRegister(driver)
+            ##### 4) Select tickets for Jummah
+            try: 
+                ClickCatagory("Fri, 11:00 AM - 3:15 PM EDT", driver)
+            except Exception as error:
+                print("Failed to select tickets, Error: {}".format(error))
 
-            # Fill out form 
-            FillContactInfo(person['firstname'], person['lastname'], person['email'], person['phone'], driver)
-            ClickRegister(driver)
+
+            ##### 5) Select a shift
+            try: 
+                SelectCatagory(Shifts[person['catagory']][person['timeslot']], driver)
+                ClickRegister(driver)
+            except Exception as error:
+                print("Failed to select from shifts list, Error: {}".format(error))
+
+
+            ##### 6) Fill out form
+            try: 
+                FillContactInfo(person['firstname'], person['lastname'], person['email'], person['phone'], driver)
+                ClickRegister(driver)
+            except Exception as error:
+                print("Failed to fill out personal info page, Error: {}".format(error)) 
 
         except Exception as error:
             print("Failed to Register, Error: {}".format(error))
@@ -45,7 +69,7 @@ def main(Registrants, Shifts):
             driver.quit()
 
 def GetDriver():
-    # Chrome
+    # Chrome (chrome driver is assumed to be inside the same dir)
     chromePath = "{}/chromedriver".format(dirname(abspath(__file__)))
     # options object
     options = Options()
@@ -54,7 +78,7 @@ def GetDriver():
     options.add_argument('--disable-gpu') 
     return Chrome(chromePath, options=options)
 
-def IncrementCatagory(catagory, driver):
+def SelectCatagory(catagory, driver):
     # Select dropdown XPATH relative to catagory title
     TitletoSelectPath = "../../div[2]/div/div/div/div/div[2]/select"
     number = 1
@@ -89,7 +113,7 @@ def FillContactInfo(fname, lname, email, phone, driver):
         "radio-buyer.U-33956774-0",
         "radio-buyer.U-37596875-0",
 
-        # marketing subscription
+        # marketing subscription (uncheck)
         "organizer-marketing-opt-in",
          "eb-marketing-opt-in"
         ]
@@ -121,8 +145,8 @@ def GetLinkfromBtnByXPATH(xpath, driver):
 if __name__ == "__main__":
     # People to register
     Registrants = [
+        ############################################################################################Q
         # FOLLOW THE EXAMPLE BELOW FOR PESONAL INFO FORMAT (only update the right side after colon):
-        
         # {
         #     "catagory": "men or women",
         #     "timeslot": "timeslot",
@@ -131,7 +155,7 @@ if __name__ == "__main__":
         #     "email": "email to get tickets",
         #     "phone": "phone #"
         # }
-        
+        ############################################################################################
     ]
     # Shifts details
     Shifts = {
