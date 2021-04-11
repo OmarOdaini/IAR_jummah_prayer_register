@@ -25,7 +25,6 @@ def main(Registrants, Shifts):
                                     
             # switch iframe (to access pop-ups)
             driver.switch_to.frame(driver.find_element_by_xpath("//iframe[starts-with(@id, 'eventbrite-widget-modal-')]"))
-            sleep(2)
 
             # Select Jummah
             ClickCatagory("Fri, 11:00 AM - 3:15 PM EDT", driver)
@@ -50,9 +49,9 @@ def GetDriver():
     chromePath = "{}/chromedriver".format(dirname(abspath(__file__)))
     # options object
     options = Options()
-    # # silent mode
-    # options.add_argument('--headless')
-    # options.add_argument('--disable-gpu') 
+    # silent mode
+    options.add_argument('--headless')
+    options.add_argument('--disable-gpu') 
     return Chrome(chromePath, options=options)
 
 def IncrementCatagory(catagory, driver):
