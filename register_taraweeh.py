@@ -13,7 +13,8 @@ def main(Registrants, Shifts):
             try: 
                 driver = GetDriver()
             except Exception as error:
-                print("Failed create a driver instance, Error: {}".format(error))
+                print("Failed create a driver instance") # , Error: {}".format(error))
+                exit(1)
 
             ##### 1) Get to main IAR page
             driver.get("https://raleighmasjid.org")
@@ -29,21 +30,24 @@ def main(Registrants, Shifts):
             try: 
                 GetLinkfromBtnByXPATH("//button[starts-with(@id, 'eventbrite-widget-modal-trigger-')]", driver).click()
             except Exception as error:
-                print("Failed to find or click 'Select A Date', Error: {}".format(error))
+                print("Failed to find or click 'Select A Date'") # , Error: {}".format(error))
+                exit(1)
 
 
             # switch iframe (to access pop-ups)
             try: 
                 driver.switch_to.frame(driver.find_element_by_xpath("//iframe[starts-with(@id, 'eventbrite-widget-modal-')]"))
             except Exception as error:
-                print("Failed to switch iframe, Error: {}".format(error))
+                print("Failed to switch iframe") # , Error: {}".format(error))
+                exit(1)
 
 
             ##### 4) Select tickets for Taraweeh
             try: 
                 ClickCatagory("9:30 PM", driver)
             except Exception as error:
-                print("Failed to select tickets, Error: {}".format(error))
+                print("Failed to select tickets") # , Error: {}".format(error))
+                exit(1)
 
 
             ##### 5) Select a shift
@@ -51,7 +55,8 @@ def main(Registrants, Shifts):
                 SelectCatagory(Shifts[person['catagory']][person['timeslot']], driver)
                 ClickRegister(driver)
             except Exception as error:
-                print("Failed to select from shifts list, Error: {}".format(error))
+                print("Failed to select shift: '{} {}' (might be soldout)".format(person['catagory'], person['timeslot'])) # , Error: {}".format(error))
+                continue
 
 
             ##### 6) Fill out form
@@ -59,10 +64,12 @@ def main(Registrants, Shifts):
                 FillContactInfo(person['firstname'], person['lastname'], person['email'], person['phone'], driver)
                 ClickRegister(driver)
             except Exception as error:
-                print("Failed to fill out personal info page, Error: {}".format(error)) 
+                print("Failed to fill out personal info page") # , Error: {}".format(error))
+                exit(1) 
 
         except Exception as error:
-            print("Failed to Register, Error: {}".format(error))
+            print("Failed to Register") # , Error: {}".format(error))
+            exit(1)
         else:
             sleep(4) 
             print("Tickets were sent to: {}".format(person['email']))
@@ -144,7 +151,7 @@ def GetLinkfromBtnByXPATH(xpath, driver):
     )
 
 if __name__ == "__main__":
-    # People to register
+    # People to registerl
     Registrants = [
         ############################################################################################
         # FOLLOW THE EXAMPLE BELOW FOR PESONAL INFO FORMAT (only update the right side after colon):
