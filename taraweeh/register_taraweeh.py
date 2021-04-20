@@ -78,9 +78,9 @@ def GetDriver():
     # options object
     options = Options()
 
-    # # silent mode
-    # options.add_argument('--headless')
-    # options.add_argument('--disable-gpu') 
+    # silent mode
+    options.add_argument('--headless')
+    options.add_argument('--disable-gpu') 
     
     return Chrome(chromePath, options=options)
 
