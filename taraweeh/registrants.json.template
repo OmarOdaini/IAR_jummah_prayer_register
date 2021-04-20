@@ -1,0 +1,11 @@
+{
+    "registrants":[
+       {
+          "catagory":"men",
+          "timeslot": "11:00",
+          "firstname":"name",
+          "lastname":"lname",
+          "email":"email@gmail.com"
+       }
+    ]
+ }
