@@ -1,2 +1,9 @@
 # prevent commit personal info
 registrants.json
+
+
+# weird file
+.DS_Store
+
+# ignore logs
+*.log
