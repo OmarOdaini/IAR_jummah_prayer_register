@@ -15,59 +15,61 @@ def main(Registrants, Shifts):
             try: 
                 driver = GetDriver()
             except Exception as error:
-                print("Failed create a driver instance, Error: {}".format(error))
-            
+                print("Failed create a driver instance while trying to register, Error: {}".format(error))
+                exit(1)
+
 
             ##### 1) Get to IAR Jummah page
             driver.get("https://raleighmasjid.org/jumaa")
             assert "The Islamic Association of Raleigh - Jumuah Registration" in driver.title
 
-
             ##### 2) Get to eventbrite registration page
-            driver.get(GetLinkfromBtn("Register for Jumuah Shifts", driver))
+            driver.get(GetLinkfromElement("Register for Jumuah Shifts", driver))
             assert "IAR Jumu'ah Registration" in driver.title
 
             ##### 3) Click "Select A Date" (TODO: make it based on text instead)
             try: 
-                GetLinkfromBtnByXPATH("//button[starts-with(@id, 'eventbrite-widget-modal-trigger-')]", driver).click()
+                GetElementByXPATH("//button[starts-with(@id, 'eventbrite-widget-modal-trigger-')]", driver).click()
             except Exception as error:
-                print("Failed to find or click 'Select A Date', Error: {}".format(error))
-
+                print("Failed to find or click 'Select A Date' while trying to register: {}".format(person['email'])) # , Error: {}".format(error))
+                continue
 
             # switch iframe (to access pop-ups)
             try: 
                 driver.switch_to.frame(driver.find_element_by_xpath("//iframe[starts-with(@id, 'eventbrite-widget-modal-')]"))
             except Exception as error:
-                print("Failed to switch iframe, Error: {}".format(error))
-
+                print("Failed to switch iframe while trying to register: {}".format(person['email'])) # , Error: {}".format(error))
+                continue
 
             ##### 4) Select tickets for Jummah
             try: 
                 ClickCatagory("Fri, 11:00 AM - 3:15 PM EDT", driver)
             except Exception as error:
-                print("Failed to select tickets, Error: {}".format(error))
-
+                print("Failed to select tickets while trying to register: {}".format(person['email'])) # , Error: {}".format(error))
+                continue
 
             ##### 5) Select a shift
             try: 
                 SelectCatagory(Shifts[person['catagory']][person['timeslot']], driver)
-                ClickRegister(driver)
+                ClickBtnByText('Register', driver)
             except Exception as error:
-                print("Failed to select from shifts list, Error: {}".format(error))
+                print("Failed to select shift: '{} {}' (might be soldout)".format(person['catagory'], person['timeslot'])) # , Error: {}".format(error))
+                continue
 
 
             ##### 6) Fill out form
             try: 
                 FillContactInfo(person['firstname'], person['lastname'], person['email'], person['phone'], driver)
-                ClickRegister(driver)
+                ClickBtnByText('Register', driver)
             except Exception as error:
-                print("Failed to fill out personal info page, Error: {}".format(error)) 
+                print("Failed to fill out personal info page while trying to register Error: {}".format(error))
+                continue
 
         except Exception as error:
-            print("Failed to Register, Error: {}".format(error))
+            print("Failed to Register while trying to register: {}".format(person['email'])) # , Error: {}".format(error))
         else:
             sleep(5) 
-            print("Tickets were sent to: {}".format(person['email']))
+            print("Tickets were sent to: {} on: {}".format(person['email'], date.today()))
             driver.quit()
 
 def GetDriver():
@@ -77,9 +79,9 @@ def GetDriver():
     # options object
     options = Options()
 
-    # silent mode
-    options.add_argument('--headless')
-    options.add_argument('--disable-gpu') 
+    # # silent mode
+    # options.add_argument('--headless')
+    # options.add_argument('--disable-gpu') 
 
     return Chrome(chromePath, options=options)
 
@@ -131,18 +133,18 @@ def FillContactInfo(fname, lname, email, phone, driver):
         checkbox = WebDriverWait(driver, 2).until(EC.presence_of_element_located((By.ID, clickable)))
         driver.execute_script("arguments[0].click();", checkbox)
 
-def ClickRegister(driver):
+def ClickBtnByText(text, driver):
     WebDriverWait(driver, 10).until(
-        EC.presence_of_element_located((By.XPATH, "//button[text()='Register']"))
+        EC.presence_of_element_located((By.XPATH, "//button[text()='{}']".format(text)))
     ).click()
-    sleep(5)
+    sleep(4)
 
-def GetLinkfromBtn(text, driver):
+def GetLinkfromElement(text, driver):
     return WebDriverWait(driver, 10).until(
         EC.presence_of_element_located((By.LINK_TEXT, text))
     ).get_attribute('href')
 
-def GetLinkfromBtnByXPATH(xpath, driver):
+def GetElementByXPATH(xpath, driver):
     return WebDriverWait(driver, 10).until(
         EC.presence_of_element_located((By.XPATH, xpath))
     )
